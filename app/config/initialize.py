@@ -6,6 +6,7 @@ from flask import Flask
 from .extensions import flask_db as db
 from . import private_config
 from . import environment
+from . import hooks
 
 
 def initialize(name):
@@ -13,6 +14,7 @@ def initialize(name):
 
     load_configs(app)
     load_extensions(app)
+    load_hooks(app)
 
     # Generate the initial database settings
     with app.app_context():
@@ -42,4 +44,8 @@ def load_extensions(app):
     if not database_exists(engine.url):
         create_database(engine.url)
     db.init_app(app)
+
+
+def load_hooks(app):
+    hooks.add_auto_commit(app, db)
 

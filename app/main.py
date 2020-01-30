@@ -19,5 +19,5 @@ def root():
     print("Here is a list of all users...")
     for user in users:
         print(f"User: {user.username} with id {user.id}")
-    return str(users)
-    # return render_template("layout.html", users=users)
+    # return str(users)
+    return render_template("layout.html", users=users)
