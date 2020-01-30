@@ -1,0 +1,8 @@
+# Call external venv
+source ~/virtual_envs/pestilence/bin/activate
+
+# Inject mysql startup into environment activation
+echo 'Enter your sudo password to start mysql'
+sudo /etc/init.d/mysql start
+sudo -k
+

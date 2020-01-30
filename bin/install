@@ -1,0 +1,162 @@
+#!/usr/bin/env bash
+# Install all necessary things to develop this app.
+# This script uses sudo only where absolutely necessary.
+
+set -e  # Sets a flag to kill script if an error is encountered
+
+install_apt_modules() {
+    echo "Installing requisite apt modules ..."
+    sudo apt update
+    sudo apt install python3 python3-venv python3-dev libmysqlclient-dev mysql-server build-essential bc -y
+    sudo -k  # Unassume sudo
+}
+
+check_python3_version() {
+    echo "Checking python3 version ..."
+    version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+    parsedVersion=$(echo "0.${version//./}")
+    if (( $(echo "$parsedVersion < 0.36" | bc -l) ));then
+        echo "Requires python>=3.6";exit 1
+    else
+        echo "Python3 version is new enough."
+    fi
+}
+
+
+setup_virtual_environment() {
+    game_name=$1
+    virtual_env=~/virtual_envs/${game_name}
+
+    if [ ! -d $virtual_env ];then
+        python3 -m venv $virtual_env
+    fi
+    rm -f bin/activate  # In case the script alreday ran
+    echo "
+    # Call external venv
+    source ~/virtual_envs/${game_name}/bin/activate
+    " | rstrip >> bin/activate
+
+    # allow activate script to auto start mysql
+    echo "
+    # Inject mysql startup into environment activation
+    echo 'Enter your sudo password to start mysql'
+    sudo /etc/init.d/mysql start
+    sudo -k
+    " | rstrip >> bin/activate
+
+    # active virtual environment
+    source bin/activate
+    pip install -U pip
+    echo "Pip activated\n: $( pip --version )"
+}
+
+install_app_into_virtual_environment() {
+    setup_file="setup.py"
+    requirements_file="requirements.txt"
+
+    if [ -e $setup_file ];then
+        pip install .
+    elif [ -e $requirements_file ];then
+        pip install -r $requirements_file
+    else
+        echo "No pip install option is available."
+        exit 1
+    fi
+}
+
+build_mysql_config() {
+    game_name=$1
+    user_passwd=$2
+    user=${3-root}
+
+    mysql_cnf=./.mysql_config.cnf
+    rm -rf $mysql_cnf
+    echo "
+    [client]
+    user = ${user}
+    password = ${user_passwd}
+    # Before use set file to read-only with \$ chmod 400 $mysql_cnf
+    " | rstrip > $mysql_cnf
+    chmod 400 $mysql_cnf
+}
+
+# NOTE: you can only have 1 tab, after that uses spaces.
+get_set_mysql_root_password() {
+    game_name=$1
+
+    echo "Enter your MYSQL root password"
+    read -s -p "(or a new root password if you are just setting up MYSQL): " mysql_passwd
+    echo
+    build_mysql_config $game_name $mysql_passwd
+    while ! sudo mysql --defaults-file=$mysql_cnf -e ";";do
+        read -s -p "Can't connect, please retry: " mysql_passwd
+        echo
+        build_mysql_config $game_name $mysql_passwd
+    done
+    sudo mysql --defaults-file=$mysql_cnf -e \
+        "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$mysql_passwd';"
+    sudo -k
+    echo "MYSQL credentials estabished, continuing ..."
+}
+
+set_mysql_user_grants() {
+    mysql_db=${1//-/_} # replace - with _
+    mysql_user=${1}_${2}
+
+    mysql_passwd=$(randpw 16)
+
+    mysql --defaults-file=$mysql_cnf -e "DROP USER IF EXISTS '${mysql_user}'@'localhost';"
+    mysql --defaults-file=$mysql_cnf -e "CREATE USER '${mysql_user}'@'localhost' IDENTIFIED BY '${mysql_passwd}';"
+    # This will create the user if they don't exist.
+    mysql --defaults-file=$mysql_cnf -e "GRANT ALL ON ${mysql_db}.* TO '${mysql_user}'@'localhost' WITH GRANT OPTION;"
+    mysql --defaults-file=$mysql_cnf -e "GRANT ALL ON ${mysql_db}_test.* TO '${mysql_user}'@'localhost' WITH GRANT OPTION;"
+    build_mysql_config $game_name $mysql_passwd $mysql_user
+    chmod 400 $mysql_cnf
+    echo "Added new user with access to ${game_name} tables."
+}
+
+
+generate_private_config() {
+    config=app/config/private_config.py
+    config_bak=app/config/private_config.py.bak
+    template_config=app/config/template_private_config.py
+    if [[ -e $config && ! -e $config_bak ]];then
+       mv $config $config_bak
+    fi
+    yes | cp -rf $template_config $config
+    sed -i 's/db_passwd/'${mysql_passwd}'/g' $config
+    sed -i 's/complex_pass/'$(randpw 64)'/g' $config
+    echo "Private app config generated."
+}
+
+ignore_private_config() {
+    LINE='private_*'
+    FILE=.gitignore
+    grep -qF -- "$LINE" "$FILE" || echo "$LINE" >> "$FILE"
+}
+
+# NOTE: to server app from inside vagrant I need to use
+# python manage.py serve -h 0.0.0.0
+install() {
+    GAME_NAME="pestilence" # Run `echo ${PWD##*/}` in current directory to check
+    CURRENT_USER=$USER
+    SCRIPT_DIR=$(dirname $0)  # Sets SCRIPT_DIR to be an absolute path (can be referenced from anywhere)
+
+    source ${SCRIPT_DIR}/bash_helpers.sh  # Imports extra helper functions
+    move_to_base $SCRIPT_DIR  # Moves current working directory to SCRIPT_DIR
+
+    install_apt_modules
+    check_python3_version
+    setup_virtual_environment $GAME_NAME
+    install_app_into_virtual_environment
+    get_set_mysql_root_password $GAME_NAME
+    set_mysql_user_grants $GAME_NAME $CURRENT_USER
+    generate_private_config
+    ignore_private_config
+    echo "${GAME_NAME} back-end development environment installed."
+
+    return_from_base
+}
+
+# run the actual install script
+install

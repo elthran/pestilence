@@ -1,0 +1,12 @@
+if [[ -z "$VIRTUAL_ENV" ]]; then
+    echo "No VIRTUAL_ENV set"
+    source bin/activate
+else
+    echo "VIRTUAL_ENV is set"
+fi
+export PYTHONBREAKPOINT=ipdb.set_trace
+
+export FLASK_APP=app/main.py
+export FLASK_ENV=development
+
+flask "${1---help}" "${@:2}"

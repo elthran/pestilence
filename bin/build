@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+
+SCRIPT_DIR=$(dirname $0)
+
+source ${SCRIPT_DIR}/bash_helpers.sh
+move_to_base $SCRIPT_DIR
+
+pushd front > /dev/null
+yarn build
+popd > /dev/null
