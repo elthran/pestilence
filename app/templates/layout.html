@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reset.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+{% if current_user and current_user.is_authenticated %}
+<h3 style="font-weight:bold;font-size:25px;">
+    <span>Business: {{ current_user.business.name }}</span>
+    <span style="float:right;">Logged in as: {{ current_user.name }}</span>
+</h3><br><br>
+{% endif %}
+{# <!-- Below is flask error code handling --> #}
+{% macro render_field(field, placeholder=None) %}
+<div>
+    {% set css_class = 'form-control ' + kwargs.pop('class', '') %}
+    {{ field(class=css_class, placeholder=placeholder, **kwargs) }}
+</div>
+{% endmacro %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<ul class=flashes>
+    {% for message in messages %}
+    {% for category, message in messages %}
+    <div class='flash-{{ category }}'>
+        <li class="flash-{{ category }}">{{ message }}</li>
+    </div>
+    {% endfor %}
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+{% if form and form.errors %}
+<div style="color:red;">
+    Form data not sent to Python due to validation failure. Errors are:
+    <ul>
+        {% for field, error in form.errors.items() %}
+        {% for e in error %}
+        <li>{{ e }}</li>
+        {% endfor %}
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{# <!-- End of flask error code handling --> #}
+{% block title %}
+{% endblock %}
+<br><br>
+{% block content %}
+{% endblock %}
+
+</body>
+</html>
