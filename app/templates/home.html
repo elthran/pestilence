@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+
+{% block title %}
+
+    <!-- No title -->
+
+{% endblock %}
+
+
+{% set user = users[0] %}
+
+
+{% block content %}
+
+Logged in as: {{ user.username }} on the {{ world.name }} map.
+<br>
+<h1>Wold Status:</h1>
+{% for city in cities %}
+    <li>City: {{ city.name }}</li>
+{% endfor %}
+
+
+{% endblock %}
+
+

@@ -9,7 +9,6 @@ class Template(db.Model):
     __abstract__ = True
 
     def save(self):
-        print(f"Saving model {self.username} with id {self.id}")
         db.session.add(self)
         self._flush()
         return self

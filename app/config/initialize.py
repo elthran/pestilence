@@ -9,12 +9,13 @@ from . import environment
 from . import hooks
 
 
-def initialize(name):
-    app = Flask(__name__)
+def initialize(name, models=None):
+    app = Flask(name.split('.')[0], static_url_path='/', static_folder='dist')
 
     load_configs(app)
     load_extensions(app)
     load_hooks(app)
+    load_models(models)
 
     # Generate the initial database settings
     with app.app_context():
@@ -26,6 +27,14 @@ def initialize(name):
             print(ex)
         print("Database created")
         db.create_all()
+
+        test_user = User("elthran")
+        test_user.save()
+        test_world = World()
+        test_world.save()
+        test_city = City(test_world.id, "Tokyo")
+        test_city.save()
+
         db.session.commit()
 
     return app
@@ -48,4 +57,9 @@ def load_extensions(app):
 
 def load_hooks(app):
     hooks.add_auto_commit(app, db)
+
+
+def load_models(models):
+    for model in models:
+        globals()[model.__name__] = model
 

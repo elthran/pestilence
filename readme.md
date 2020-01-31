@@ -7,6 +7,5 @@ Steps for fresh install on new PC:
 
 
 Questions:
-1. Why pass a __name__ to flask?
-2. Why database won't persist? Debug mode?
+1. Why `app = Flask(name.split('.')[0], static_url_path='/', static_folder='dist')`
  
