@@ -2,11 +2,16 @@ from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 from sqlalchemy.exc import OperationalError as SqlalchemyOperationalError
 from flask import Flask
+from flask_login import LoginManager
 
 from .extensions import flask_db as db
 from . import private_config
 from . import environment
 from . import hooks
+from ..models import User
+
+login_manager = LoginManager()
+# login_manager.anonymous_user = AnonymousUser
 
 
 def initialize(name, models=None):
@@ -16,6 +21,8 @@ def initialize(name, models=None):
     load_extensions(app)
     load_hooks(app)
     load_models(models)
+
+    login_manager.init_app(app)
 
     # Generate the initial database settings
     with app.app_context():
@@ -27,13 +34,6 @@ def initialize(name, models=None):
             print(ex)
         print("Database created")
         db.create_all()
-
-        test_user = User("elthran")
-        test_user.save()
-        test_world = World()
-        test_world.save()
-        test_city = City(test_world.id, "Tokyo")
-        test_city.save()
 
         db.session.commit()
 
@@ -62,4 +62,9 @@ def load_hooks(app):
 def load_models(models):
     for model in models:
         globals()[model.__name__] = model
+
+
+@login_manager.user_loader
+def load_user(id_):
+    return User.query.get(id_)
 
