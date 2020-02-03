@@ -10,7 +10,7 @@ class Template(db.Model):
 
     def save(self):
         db.session.add(self)
-        self._flush()
+        db.session.commit()
         return self
 
     def update(self, **kwargs):

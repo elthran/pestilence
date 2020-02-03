@@ -1,25 +1,50 @@
 {% extends "layout.html" %}
 
+{% set user = user %}
 
 {% block title %}
-
-    <!-- No title -->
-
+    Logged in as: {{ user.username }} on the {{ world.name }} map.
 {% endblock %}
-
-
-{% set user = users[0] %}
-
 
 {% block content %}
 
-Logged in as: {{ user.username }} on the {{ world.name }} map.
-<br>
-<h1>Wold Status:</h1>
-{% for city in cities %}
-    <li>City: {{ city.name }}</li>
-{% endfor %}
-
+{% if disease.type == None %}
+    <h1>Choose Your Disease</h1>
+    <a href="{{ url_for('select_type', type='bacterium') }}">
+        <button style="float:left;width:300px;height:200px;">
+            <h3>Bacterium (3 points)</h3> - More fatal
+        </button>
+    </a>
+    <a href="{{ url_for('select_type', type='virus') }}">
+        <button style="float:left;width:300px;height:200px;">
+            <h3>Virus (2 points)</h3> - More resistant to treatment
+        </button>
+    </a>
+{% elif disease.points > 0 %}
+    <h1>Upgrade Your Disease (You have {{ disease.points }} points to spend)</h1>
+    <a href="{{ url_for('upgrade_trait', trait='mortality') }}">
+        <button style="float:left;width:300px;height:200px;">
+            <h3>Mortality (1 point)</h3> - More fatal
+        </button>
+    </a>
+    <a href="{{ url_for('upgrade_trait', trait='infectiousness') }}">
+        <button style="float:left;width:300px;height:200px;">
+            <h3>Infectiousness (1 point)</h3> - More likely to spread
+        </button>
+    </a>
+{% else %}
+    <h1>Status:</h1>
+    Currently {{ disease.infected }} people are infected with the {{ disease.name }} {{ disease.type }}
+    and {{ disease.deaths }} have died.
+    <h3>Mortality: {{ disease.mortality }}</h3>
+    <h3>Infectiousness: {{ disease.infectiousness }}</h3>
+    <div><img class="resource_icons" src="/static/images/map.png"></div>
+    <div><br>
+        {% for ticker in tickers | reverse %}
+        <li>Day {{ ticker.day }}: {{ ticker.message }}</li>
+        {% endfor %}
+    </div>
+{% endif %}
 
 {% endblock %}
 

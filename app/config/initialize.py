@@ -15,7 +15,7 @@ login_manager = LoginManager()
 
 
 def initialize(name, models=None):
-    app = Flask(name.split('.')[0], static_url_path='/', static_folder='dist')
+    app = Flask(name.split('.')[0])
 
     load_configs(app)
     load_extensions(app)
@@ -28,6 +28,7 @@ def initialize(name, models=None):
     with app.app_context():
         try:  # an empty database can't be drop (first run only)
             print("Database dropped!")
+            # db.session.close()
             db.drop_all()
         except SqlalchemyOperationalError as ex:
             print('Ignore if first run.')

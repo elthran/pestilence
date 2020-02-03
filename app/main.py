@@ -1,8 +1,9 @@
-from flask import render_template, session
+from flask import render_template, session, url_for
 from flask_login import current_user, login_user
+from werkzeug.utils import redirect
 
 from .config.initialize import initialize
-from .models import User, World, City
+from .models import User, World, City, Disease, Ticker
 
 app = initialize(__name__, models=[World, User, City])
 
@@ -11,7 +12,6 @@ app = initialize(__name__, models=[World, User, City])
 def root():
     """
     """
-    print(session)
     if current_user.is_authenticated:
         # If the player has logged in through Flask, use that account.
         user = current_user
@@ -23,18 +23,40 @@ def root():
     if user.worlds == []:
         world = World("Simple Earth", user.id)
         world.save()
-        city = City("Tokyo", world.id)
-        city.save()
+        for name in ["Tokyo", "Taipei", "Vancouver", "London", "Paris", "Cape Town", "Beijing",
+                     "Toronto", "Lima", "Havana", "Mexico City", "Moscow", "Bangkok", "Washington DC"]:
+            city = City(name, world.id)
+            city.save()
+        disease = Disease("Poop-panda Disease", world.id)
+        disease.save()
+    world = user.worlds[0]
+    cities = world.cities
+    disease = world.diseases[0]
+    world.pass_time()
+    return render_template("home.html",
+                           user=user,
+                           world=world,
+                           cities=cities,
+                           disease=disease,
+                           tickers=world.tickers)
 
-    world = World.query.first()
-    print("User worlds,....:", user.worlds)
-    print("My Worlds:", world)
-    print("My Cities:", world.cities)
-    print("Current user:", user)
-    print("Flask user:", current_user)
-    print("Flask session:", session)
-    cities = world.cities # world.cities
-    return render_template("home.html", users=[user], world=world, cities=cities)
+
+@app.route('/select_type/<string:type>')
+def select_type(type):
+    """
+    """
+    disease = current_user.worlds[0].diseases[0]
+    disease.assign_type(type)
+    return redirect(url_for('root'))
+
+
+@app.route('/upgrade_trait/<string:trait>')
+def upgrade_trait(trait):
+    """
+    """
+    disease = current_user.worlds[0].diseases[0]
+    disease.upgrade_trait(trait)
+    return redirect(url_for('root'))
 
 
 # if session.new:
