@@ -3,47 +3,71 @@
 {% set user = user %}
 
 {% block title %}
-    Logged in as: {{ user.username }} on the {{ world.name }} map.
+Logged in as: {{ user.username }} on the {{ world.name }} map.
 {% endblock %}
 
 {% block content %}
 
 {% if disease.type == None %}
-    <h1>Choose Your Disease</h1>
-    <a href="{{ url_for('select_type', type='bacterium') }}">
-        <button style="float:left;width:300px;height:200px;">
-            <h3>Bacterium (3 points)</h3> - More fatal
-        </button>
-    </a>
-    <a href="{{ url_for('select_type', type='virus') }}">
-        <button style="float:left;width:300px;height:200px;">
-            <h3>Virus (2 points)</h3> - More resistant to treatment
-        </button>
-    </a>
+<h1>Choose Your Disease</h1>
+<a href="{{ url_for('select_type', type='bacterium') }}">
+    <button style="float:left;width:300px;height:200px;">
+        <h3>Bacterium (3 points)</h3> - More fatal
+    </button>
+</a>
+<a href="{{ url_for('select_type', type='virus') }}">
+    <button style="float:left;width:300px;height:200px;">
+        <h3>Virus (2 points)</h3> - More resistant to treatment
+    </button>
+</a>
 {% elif disease.points > 0 %}
-    <h1>Upgrade Your Disease (You have {{ disease.points }} points to spend)</h1>
-    <a href="{{ url_for('upgrade_trait', trait='mortality') }}">
-        <button style="float:left;width:300px;height:200px;">
-            <h3>Mortality (1 point)</h3> - More fatal
-        </button>
-    </a>
-    <a href="{{ url_for('upgrade_trait', trait='infectiousness') }}">
-        <button style="float:left;width:300px;height:200px;">
-            <h3>Infectiousness (1 point)</h3> - More likely to spread
-        </button>
-    </a>
+<h1>Upgrade Your Disease (You have {{ disease.points }} points to spend)</h1>
+<a href="{{ url_for('upgrade_trait', trait='mortality') }}">
+    <button style="float:left;width:300px;height:200px;">
+        <h3>Mortality (1 point)</h3> - More fatal
+    </button>
+</a>
+<a href="{{ url_for('upgrade_trait', trait='infectiousness') }}">
+    <button style="float:left;width:300px;height:200px;">
+        <h3>Infectiousness (1 point)</h3> - More likely to spread
+    </button>
+</a>
+</a>
+<a href="{{ url_for('upgrade_trait', trait='resistance') }}">
+    <button style="float:left;width:300px;height:200px;">
+        <h3>Duration (1 point)</h3> - Disease infects people for longer
+    </button>
+</a>
+<a href="{{ url_for('upgrade_trait', trait='duration') }}">
+    <button style="float:left;width:300px;height:200px;">
+        <h3>Resistance (1 point)</h3> - Less likely to be cured
+    </button>
+</a>
+{% elif world.day == 25 %}
+GAME OVER!!!! YOUR SCORE WAS {{ disease.dead }} dead and {{ disease.infected }} currently infected.
 {% else %}
-    <h1>Status:</h1>
-    Currently {{ disease.infected }} people are infected with the {{ disease.name }} {{ disease.type }}
-    and {{ disease.deaths }} have died.
-    <h3>Mortality: {{ disease.mortality }}</h3>
-    <h3>Infectiousness: {{ disease.infectiousness }}</h3>
-    <div><img class="resource_icons" src="/static/images/map.png"></div>
-    <div><br>
-        {% for ticker in tickers | reverse %}
-        <li>Day {{ ticker.day }}: {{ ticker.message }}</li>
-        {% endfor %}
-    </div>
+<h1>Disease Status:</h1>
+<p>Currently {{ disease.infected }} people are infected with the {{ disease.name }} {{ disease.type }}
+    and {{ disease.dead }} have died.</p>
+<ul>
+    <li>Mortality Rate: {{ disease.mortality }}%</li>
+    <li>Rate of Infection: {{ disease.infectiousness }}%</li>
+    <li>Duration: {{ disease.duration }} days</li>
+    <li>Antibiotical Resistance: +{{ disease.resistance }}%</li>
+</ul>
+
+<h1>World Status</h1>
+<div><img class="resource_icons" src="/static/images/map.png"></div>
+<div><br>
+    {% for city in world.cities %}
+    <li>Day {{ city.name }}: {{ city.infected }} / {{ city.population }} infected. Also {{ city.recovered }} have recovered and {{ city.susceptible }} are vulnerable.</li>
+    {% endfor %}
+
+    <h1>News Feed</h1>
+    {% for ticker in tickers | reverse %}
+    <li>Day {{ ticker.day }}: {{ ticker.message }}</li>
+    {% endfor %}
+</div>
 {% endif %}
 
 {% endblock %}

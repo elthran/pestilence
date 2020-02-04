@@ -1,7 +1,9 @@
+import math
 import random
 
 from .templates import db, ModelState
 from .tickers import Ticker
+from .cities import City
 
 
 class World(ModelState):
@@ -15,33 +17,43 @@ class World(ModelState):
     def __init__(self, name, user_id):
         self.name = name
         self.user_id = user_id
-        self.day = 0
+        self.day = -1
 
     def pass_time(self):
-        self.day += 1
-        if self.day > 2:
-            newly_infected = random.randint(0, self.day * 2)
-            self.diseases[0].infected += newly_infected
-            newly_dead = random.randint(0, (self.diseases[0].infected - self.diseases[0].deaths) // 4)
-            self.diseases[0].deaths += random.randint(0, newly_dead)
-        self.update_ticker()
+        if self.day == 25:
+            print(f"GAME OVER. YOUR SCORE WAS {self.diseases[0].dead}")
+            return False
 
-    def update_ticker(self):
-        ticker = None
-        city = random.choice(self.cities).name
-        if self.day == 1:
-            ticker = Ticker(self.day,
-                            f"A new disease called {self.diseases[0].name} was reported.",
-                            self.id)
-        elif self.day % 7 == 4:
-            ticker = Ticker(self.day,
-                            f"The disease has broken out in {city}.",
-                            self.id)
-        if self.day == 9:
-            ticker = Ticker(self.day,
-                            f"The city of {city} has begun working on a cure for {self.diseases[0].name}.",
-                            self.id)
-        if ticker:
+        infected_cities = [city for city in self.cities if city.infected > 0]
+        uninfected_cities = [city for city in self.cities if city.infected == 0]
+
+        if len(infected_cities) == 0:
+            city = random.choice(uninfected_cities)
+            city.update_population(self.diseases[0])
+            self.update_ticker(city=city, reason="first")
+        else:
+            for city in infected_cities:
+                city.update_population(self.diseases[0])
+
+            for city in uninfected_cities:  # Check if the disease spreads to a new city
+                if random.randint(1, 10) == 10:
+                    city.update_population(self.diseases[0])
+                    self.update_ticker(city=city, reason="new")
+
+        self.update_ticker()
+        self.day += 1
+
+    def update_ticker(self, city=None, reason=None):
+        if reason:
+            ticker = None
+            if reason == "first":
+                ticker = Ticker(self.day,
+                                f"The {self.diseases[0].name} has been discovered in {city.name}.",
+                                self.id)
+            elif reason == "new":
+                ticker = Ticker(self.day,
+                                f"The disease has reportedly spread to {city.name}.",
+                                self.id)
             ticker.save()
 
     def __repr__(self):

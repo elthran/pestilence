@@ -23,8 +23,7 @@ def root():
     if user.worlds == []:
         world = World("Simple Earth", user.id)
         world.save()
-        for name in ["Tokyo", "Taipei", "Vancouver", "London", "Paris", "Cape Town", "Beijing",
-                     "Toronto", "Lima", "Havana", "Mexico City", "Moscow", "Bangkok", "Washington DC"]:
+        for name in ["Taipei", "Vancouver"]:
             city = City(name, world.id)
             city.save()
         disease = Disease("Poop-panda Disease", world.id)
@@ -36,7 +35,6 @@ def root():
     return render_template("home.html",
                            user=user,
                            world=world,
-                           cities=cities,
                            disease=disease,
                            tickers=world.tickers)
 

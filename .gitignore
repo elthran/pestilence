@@ -1,3 +1,4 @@
 private_*
 .idea/
 */__pycache__/
+*.cpython-36.pyc
