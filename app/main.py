@@ -1,9 +1,10 @@
 from flask import render_template, session, url_for
 from flask_login import current_user, login_user
+from sqlalchemy import func
 from werkzeug.utils import redirect
 
 from .config.initialize import initialize
-from .models import User, World, City, Disease, Ticker
+from .models import User, World, City, Disease, Ticker, Highscore
 
 app = initialize(__name__, models=[World, User, City])
 
@@ -20,30 +21,29 @@ def root():
         user = User("Guest")
         user.save()
         login_user(user)
-    if user.worlds == []:
-        world = World("Simple Earth", user.id)
-        world.save()
-        for name in ["Taipei", "Vancouver"]:
-            city = City(name, world.id)
-            city.save()
-        disease = Disease("Poop-panda Disease", world.id)
-        disease.save()
-    world = user.worlds[0]
-    cities = world.cities
-    disease = world.diseases[0]
-    world.pass_time()
+    # Get the most recent World of the user? Maybe each world has an ACTIVE boolean instead?
+    world = user.world
+    if world:
+        disease = world.diseases[0]
+        world.pass_time()
+        print("first:", world.id)
+    else:
+        disease = None
+    print("all:", user.worlds)
+    highscores = Highscore.query.all()
+    print(highscores)
     return render_template("home.html",
                            user=user,
                            world=world,
                            disease=disease,
-                           tickers=world.tickers)
+                           highscores=highscores)
 
 
 @app.route('/select_type/<string:type>')
 def select_type(type):
     """
     """
-    disease = current_user.worlds[0].diseases[0]
+    disease = current_user.world.diseases[0]
     disease.assign_type(type)
     return redirect(url_for('root'))
 
@@ -52,8 +52,27 @@ def select_type(type):
 def upgrade_trait(trait):
     """
     """
-    disease = current_user.worlds[0].diseases[0]
+    disease = current_user.world.diseases[0]
     disease.upgrade_trait(trait)
+    return redirect(url_for('root'))
+
+
+@app.route('/start_game/')
+def start_game():
+    """
+    """
+    user = current_user
+    world = World.query.filter(User.id == user.id).filter(World.active == True).first()
+    if world:
+        # This user already has an active game
+        return redirect(url_for('root'))
+    world = World("Simple Earth", user.id)
+    world.save()
+    for name in ["Taipei", "Vancouver"]:
+        city = City(name, world.id)
+        city.save()
+    disease = Disease("Poop-panda Disease", world.id)
+    disease.save()
     return redirect(url_for('root'))
 
 

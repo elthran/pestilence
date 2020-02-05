@@ -8,7 +8,13 @@ Logged in as: {{ user.username }} on the {{ world.name }} map.
 
 {% block content %}
 
-{% if disease.type == None %}
+{% if world == None %}
+<a href="{{ url_for('start_game') }}">
+    <button style="float:left;width:300px;height:200px;">
+        <h3>Start New Game</h3>
+    </button>
+</a>
+{% elif disease.type == None %}
 <h1>Choose Your Disease</h1>
 <a href="{{ url_for('select_type', type='bacterium') }}">
     <button style="float:left;width:300px;height:200px;">
@@ -45,6 +51,11 @@ Logged in as: {{ user.username }} on the {{ world.name }} map.
 </a>
 {% elif world.day == 25 %}
 GAME OVER!!!! YOUR SCORE WAS {{ disease.dead }} dead and {{ disease.infected }} currently infected.
+<a href="{{ url_for('start_game') }}">
+    <button style="float:left;width:300px;height:200px;">
+        <h3>Start New Game</h3>
+    </button>
+</a>
 {% else %}
 <h1>Disease Status:</h1>
 <p>Currently {{ disease.infected }} people are infected with the {{ disease.name }} {{ disease.type }}
@@ -64,11 +75,20 @@ GAME OVER!!!! YOUR SCORE WAS {{ disease.dead }} dead and {{ disease.infected }} 
     {% endfor %}
 
     <h1>News Feed</h1>
-    {% for ticker in tickers | reverse %}
+    {% for ticker in world.tickers | reverse %}
     <li>Day {{ ticker.day }}: {{ ticker.message }}</li>
     {% endfor %}
 </div>
+<div>
+    <h1>High Scores:</h1>
+    <ul>
+    {% for score in highscores %}
+        <li>{{ score.user.username }}: {{ score.score }}</li>
+    {% endfor %}
+    </ul>
+</div>
 {% endif %}
+
 
 {% endblock %}
 

@@ -1,9 +1,8 @@
-import math
 import random
 
 from .templates import db, ModelState
 from .tickers import Ticker
-from .cities import City
+from .highscores import Highscore
 
 
 class World(ModelState):
@@ -13,15 +12,20 @@ class World(ModelState):
     diseases = db.relationship('Disease', backref='world')
     tickers = db.relationship('Ticker', backref='world')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    active = db.Column(db.Boolean)
 
     def __init__(self, name, user_id):
         self.name = name
         self.user_id = user_id
-        self.day = -1
+        self.day = 0
+        self.active = True
 
     def pass_time(self):
         if self.day == 25:
             print(f"GAME OVER. YOUR SCORE WAS {self.diseases[0].dead}")
+            your_score = Highscore(self.user_id, self.id, self.diseases[0].dead)
+            your_score.save()
+            self.active = False
             return False
 
         infected_cities = [city for city in self.cities if city.infected > 0]

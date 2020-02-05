@@ -3,12 +3,15 @@ from flask_login import AnonymousUserMixin, UserMixin
 from .templates import db, ModelState
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from .worlds import World
+
 
 class User(UserMixin, ModelState):
     username = db.Column(db.String(64))
     password_hash = db.Column(db.String(192), nullable=False)
 
     worlds = db.relationship('World', backref='user')
+    highscores = db.relationship('Highscore', backref='user')
 
     # Flask
     is_authenticated = db.Column(db.Boolean)  # User has logged in through flask. (Flask)
@@ -27,6 +30,11 @@ class User(UserMixin, ModelState):
     @property
     def password(self):
         raise AttributeError('Password is not a readable attribute. Only password_hash is stored.')
+
+    @property
+    def world(self):
+        world = World.query.filter(User.id == self.id).filter(World.active == True).first()
+        return world
 
     def set_password_hash(self, password):
         self.password_hash = generate_password_hash(password)
