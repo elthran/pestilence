@@ -1,0 +1,92 @@
+{% extends "layout.html" %}
+
+{% block title %}Login: {{ super() }}{% endblock %}
+
+{% block style %}
+{{ super() }}
+<style type="text/css">
+#content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 3em;
+    margin-bottom: 3em;
+}
+
+#header {
+    width: 500px;
+    margin: auto;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: auto;
+}
+
+#footer {
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+br {
+    margin-bottom: 1em;
+}
+
+button {
+    padding: 0.3em;
+    margin-top: 0.3em;
+}
+
+.form-control {
+    width: 18em;
+    height: 2.4em;
+    padding-left: 1em;
+    margin-bottom: 0.3em;
+}
+
+.center {
+    text-align: center;
+}
+
+</style>
+{% endblock %}
+
+{% block content1 %}
+<div id="content">
+  <div id="header">
+    <h1>Welcome to Undying Kingdoms</h1>
+    <h2>Take charge of your county and become the rightful ruler of your kingdom, and then take over the world!</h2>
+    <br>
+  </div>
+  <form method="POST" accept-charset="UTF-8" role="form">
+    <!-- LoginForm -->
+    {{ form.csrf_token }}
+    {{ render_field(form.email, placeholder="Your Email Address", autofocus="") }}
+    {{ render_field(form.password, placeholder="Password") }}
+    <p>
+      <input type="checkbox" name="remember" value="1"> Remember Me
+    </p>
+    <br>
+    <button type="submit">Sign in</button>
+    <br><br>
+    <a class="center" role="button" href="/register">New user? Create account here.</a>
+  </form>
+  <div id="footer">
+    <br><br>
+    <p>The game is currently in early stages of Alpha (0.0.11)</p>
+    <p>This round of testing will end in mid May.</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+{{ super () }}
+<script type="text/javascript">
+</script>
+{% endblock %}
