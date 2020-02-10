@@ -3,7 +3,11 @@
 {% set user = user %}
 
 {% block title %}
-Logged in as: {{ user.username }} on the {{ world.name }} map.
+{% if session['is_guest'] == True %}
+Not logged in. Playing as Guest.
+{% else %}
+Logged in as: {{ user.username }}.
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -86,6 +90,17 @@ GAME OVER!!!! YOUR SCORE WAS {{ disease.dead }} dead and {{ disease.infected }} 
         <li>{{ score.user.username }}: {{ score.score }}</li>
     {% endfor %}
     </ul>
+</div>
+{% endif %}
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{% if user.is_active %}
+<div>
+    <a href="{{ url_for('logout') }}"><h3>Log Out</h3></a>
+</div>
+{% else %}
+<div>
+    <a href="{{ url_for('login') }}"><h3>Log In</h3></a>
+    <a href="{{ url_for('register_account') }}"><h3>Register</h3></a>
 </div>
 {% endif %}
 

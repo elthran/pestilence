@@ -34,7 +34,6 @@ class City(ModelState):
         new_deaths = int(math.floor((self.infected * mortality / 100) + random.random()))
         self.population -= new_deaths
         self.dead += new_deaths
-        print("New deaths:", new_deaths)
 
     def update_recovered(self, duration):
         """
@@ -42,7 +41,6 @@ class City(ModelState):
         """
         new_recoveries = int(math.floor(((20 - duration) / 100) + random.random()))
         self.recovered += new_recoveries
-        print("New recoveries:", new_recoveries)
 
     def update_infected(self, infectiousness):
         """
@@ -55,7 +53,6 @@ class City(ModelState):
             new_infected_infections = (infectiousness / 100) * self.infected * ((self.susceptible - self.infected) / self.susceptible)
             new_infected_infections_rounded = int(math.floor(new_infected_infections + random.random()))
         self.infected += new_infected_infections_rounded
-        print("New infected total:", new_infected_infections, new_infected_infections_rounded)
 
     def update_population(self, disease):
         if self.infected > 0 and disease is None:

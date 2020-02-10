@@ -67,5 +67,9 @@ def load_models(models):
 
 @login_manager.user_loader
 def load_user(id_):
-    return User.query.get(id_)
+    print("Loading user with id:", id_)
+    try:
+        return User.query.get(id_)
+    except:
+        return None
 

@@ -24,7 +24,7 @@ class User(UserMixin, ModelState):
 
         # Flask login
         self.is_authenticated = True
-        self.is_active = True
+        self.is_active = False
         self.is_anonymous = False
 
     @property
@@ -35,6 +35,9 @@ class User(UserMixin, ModelState):
     def world(self):
         world = World.query.filter(User.id == self.id).filter(World.active == True).first()
         return world
+
+    def get_id(self):
+        return self.id
 
     def set_password_hash(self, password):
         self.password_hash = generate_password_hash(password)

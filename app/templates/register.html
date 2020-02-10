@@ -1,63 +1,19 @@
 {% extends "layout.html" %}
 
-{% block title %}Register: {{ super() }}{% endblock %}
+{% block title %}Register{% endblock %}
 
-{% block style %}
-<style type="text/css">
-#content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 1em;
-}
-
-h2 {
-    text-align: left;
-    width: 280px;
-    margin: auto;
-    padding: 1.4em 0;
-}
-
-.form-control {
-    width: 100%;
-    margin-bottom: 4px;
-}
-
-button {
-    width: 100%;
-}
-
-#spacer {
-    height: 1.3em;
-}
-
-#checkboxDiv {
-    width: 100%;
-    text-align: left;
-    max-width: 240px;
-    margin-top: 0.6em;
-}
-</style>
-{% endblock %}
-
-{% block content1 %}
+{% block content %}
 <div id="content">
     <h2>Enter your registration info:</h2>
     <form method="POST" accept-charset="UTF-8" role="form">
         <!-- LoginForm -->
         {{ form.csrf_token }}
-        {{ render_field(form.email, placeholder="Your Email Address", autofocus="") }}
         {{ render_field(form.username, placeholder="Your Username") }}
         <div id="spacer"></div>
         {{ render_field(form.password, placeholder="Password") }}
-        {{ render_field(form.confirmation, placeholder="Retype password") }}
-        <div id="checkboxDiv">
-            <input class="checkbox" type="checkbox" name="remember" value="1"> <span>Remember Me</span>
-        </div>
         <br>
         <button type="submit">Create Account</button>
-        <br><br><br>
-        <a role="button" href="/">Already have an account? Login here.</a>
     </form>
 </div>
+<a href="{{ url_for('root') }}"><h3>Main Menu</h3></a>
 {% endblock %}

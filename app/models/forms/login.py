@@ -5,5 +5,10 @@ from wtforms.validators import DataRequired, Email
 
 
 class LoginForm(FlaskForm):
-    email = StringField('Email Address', validators=[Email(), DataRequired(message='Forgot your email address?')])
+    username = StringField('Username', [DataRequired(message='You must enter a username.')])
     password = PasswordField('Password', validators=[DataRequired(message='Must provide a password.')])
+
+    def validate(self):
+        if not FlaskForm.validate(self):
+            return False
+        return True

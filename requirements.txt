@@ -1,6 +1,7 @@
 flask==1.1.1
 Flask-Login==0.4.1
 Flask-SQLAlchemy==2.4.1
+Flask-WTF==0.14.3
 mysqlclient==1.3.14
 SQLAlchemy==1.3.11
 SQLAlchemy-Utils==0.34.2

@@ -26,17 +26,14 @@ def root():
     if world:
         disease = world.diseases[0]
         world.pass_time()
-        print("first:", world.id)
     else:
         disease = None
-    print("all:", user.worlds)
-    highscores = Highscore.query.all()
-    print(highscores)
+    print("User:", user.username)
     return render_template("home.html",
                            user=user,
                            world=world,
                            disease=disease,
-                           highscores=highscores)
+                           highscores=Highscore.query.all())
 
 
 @app.route('/select_type/<string:type>')
