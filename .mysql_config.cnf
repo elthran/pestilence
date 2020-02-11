@@ -1,0 +1,5 @@
+[client]
+user = pestilence_jbrunner
+password = ptsceROaIp2xLPtH
+# Before use set file to read-only with $ chmod 400 ./.mysql_config.cnf
+
