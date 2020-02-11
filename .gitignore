@@ -1,4 +1,5 @@
 private_*
 .idea/
-*/__pycache__/
-*.cpython-36.pyc
+__pycache__/
+*.pyc
+venv/
