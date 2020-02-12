@@ -1,5 +1,5 @@
-from flask import render_template, session, url_for
-from flask_login import current_user, login_user, logout_user
+from flask import render_template, session, url_for, flash
+from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.utils import redirect
 
 from .config.initialize import initialize
@@ -14,23 +14,23 @@ app = initialize(__name__, models=[World, User, City])
 def root():
     """
     """
-    print(session)
     if not current_user.is_authenticated:
         # Use a newly created Guest account.
         user = User("Guest")
         user.save()
         user.start_session()
         login_user(user, force=True, remember=True)
-        session['is_guest'] = True
-    else:
-        session['is_guest'] = False
 
     session.permanent = True
     session['username'] = current_user.username
     session['user_id'] = current_user.id
 
-    print(session)
-    print(current_user)
+    if current_user.is_active:
+        session['is_anonymous'] = False
+    else:
+        session['is_anonymous'] = True
+
+    print(f"User {current_user} is currently in session {session}.")
 
     world = current_user.world
     if world:
@@ -47,6 +47,7 @@ def root():
 
 
 @app.route('/register_account/', methods=['GET', 'POST'])
+@login_required
 def register_account():
     """
     """
@@ -65,8 +66,11 @@ def register_account():
 
 
 @app.route('/login/', methods=['GET', 'POST'])
+@login_required
 def login():
     if current_user.is_active:
+        flash(f"You are currently logged in as {current_user.username}. "
+              f"If you wish to log in as a different account, please log out first.")
         return redirect(url_for('root'))
 
     form = LoginForm()
@@ -74,13 +78,20 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter(User.username == form.username.data).first()
         if user and user.check_password(form.password.data):
+            # Delete current Guest account if it's useless
+            guest_account = current_user if not current_user.is_active else None
             login_user(user)
+            if guest_account and (guest_account.time_modified - guest_account.time_created).seconds < 60:
+                pass
+                # Want to delete but need to cascade delete
+                # guest_account.delete()
             return redirect(url_for('root'))
 
     return render_template("login.html", form=form)
 
 
 @app.route('/logout/')
+@login_required
 def logout():
     current_user.end_session()
     logout_user()
@@ -88,6 +99,7 @@ def logout():
 
 
 @app.route('/select_type/<string:type>')
+@login_required
 def select_type(type):
     """
     """
@@ -97,6 +109,7 @@ def select_type(type):
 
 
 @app.route('/upgrade_trait/<string:trait>')
+@login_required
 def upgrade_trait(trait):
     """
     """
@@ -106,6 +119,7 @@ def upgrade_trait(trait):
 
 
 @app.route('/start_game/')
+@login_required
 def start_game():
     """
     """

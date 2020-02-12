@@ -53,9 +53,7 @@ class User(ModelState):
 
     def start_session(self):
         if self.current_session_id:
-            print("ending")
             self.end_session()
-        print("starting")
         session = Session(self.id)
         session.save()
         self.current_session_id = session.id
