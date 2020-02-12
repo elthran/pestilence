@@ -11,7 +11,6 @@ from . import hooks
 from ..models import User
 
 login_manager = LoginManager()
-# login_manager.anonymous_user = AnonymousUser
 
 
 def initialize(name, models=None):
@@ -23,6 +22,8 @@ def initialize(name, models=None):
     load_models(models)
 
     login_manager.init_app(app)
+    login_manager.login_view = "login"
+    login_manager.login_message = u"You need to be logged in to see this page."
 
     # Generate the initial database settings
     with app.app_context():
@@ -67,7 +68,6 @@ def load_models(models):
 
 @login_manager.user_loader
 def load_user(id_):
-    print("Loading user with id:", id_)
     try:
         return User.query.get(id_)
     except:

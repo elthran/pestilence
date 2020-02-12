@@ -14,11 +14,13 @@ app = initialize(__name__, models=[World, User, City])
 def root():
     """
     """
+    print(session)
     if not current_user.is_authenticated:
         # Use a newly created Guest account.
         user = User("Guest")
         user.save()
-        login_user(user, force=True)
+        user.start_session()
+        login_user(user, force=True, remember=True)
         session['is_guest'] = True
     else:
         session['is_guest'] = False
@@ -26,6 +28,9 @@ def root():
     session.permanent = True
     session['username'] = current_user.username
     session['user_id'] = current_user.id
+
+    print(session)
+    print(current_user)
 
     world = current_user.world
     if world:
@@ -77,6 +82,7 @@ def login():
 
 @app.route('/logout/')
 def logout():
+    current_user.end_session()
     logout_user()
     return redirect(url_for('root'))
 
