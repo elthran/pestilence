@@ -39,6 +39,8 @@ def root():
     else:
         disease = None
 
+    current_user.session.session_heartbeat()
+
     return render_template("home.html",
                            user=current_user,
                            world=world,

@@ -4,6 +4,6 @@ from flask_login import logout_user, current_user
 
 @app.route('/logout/')
 def logout():
-    current_user.end_session()
+    current_user.end_session(proper_logout=True)
     logout_user()
     return redirect(url_for('home'))

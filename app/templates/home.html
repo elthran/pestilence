@@ -13,6 +13,7 @@ Logged in as: {{ user.username }}.
 {% block content %}
 
 {% if world == None %}
+<div>
 <a href="{{ url_for('start_game') }}">
     <button style="float:left;width:300px;height:200px;">
         <h3>Start New Game</h3>
@@ -53,14 +54,18 @@ Logged in as: {{ user.username }}.
         <h3>Resistance (1 point)</h3> - Less likely to be cured
     </button>
 </a>
+</div>
 {% elif world.day == 25 %}
+<div>
 GAME OVER!!!! YOUR SCORE WAS {{ disease.dead }} dead and {{ disease.infected }} currently infected.
 <a href="{{ url_for('start_game') }}">
     <button style="float:left;width:300px;height:200px;">
         <h3>Start New Game</h3>
     </button>
 </a>
+</div>
 {% else %}
+<div>
 <h1>Disease Status:</h1>
 <p>Currently {{ disease.infected }} people are infected with the {{ disease.name }} {{ disease.type }}
     and {{ disease.dead }} have died.</p>
@@ -70,7 +75,7 @@ GAME OVER!!!! YOUR SCORE WAS {{ disease.dead }} dead and {{ disease.infected }} 
     <li>Duration: {{ disease.duration }} days</li>
     <li>Antibiotical Resistance: +{{ disease.resistance }}%</li>
 </ul>
-
+</div>
 <h1>World Status</h1>
 <div><img class="resource_icons" src="/static/images/map.png"></div>
 <div><br>
@@ -83,7 +88,7 @@ GAME OVER!!!! YOUR SCORE WAS {{ disease.dead }} dead and {{ disease.infected }} 
     <li>Day {{ ticker.day }}: {{ ticker.message }}</li>
     {% endfor %}
 </div>
-<div>
+<div style="clear:both">
     <h1>High Scores:</h1>
     <ul>
     {% for score in highscores %}
@@ -93,6 +98,9 @@ GAME OVER!!!! YOUR SCORE WAS {{ disease.dead }} dead and {{ disease.infected }} 
 </div>
 {% endif %}
 <br><br><br><br>
+<h2>User info</h2>
+<h3>This session has been open for {{ current_user.session.length_in_seconds }} seconds. In total you have played for {{ current_user.time_played_in_seconds }} seconds.</h3>
+<h3>You have played {{ current_user.games_played }} games.</h3>
 {% if user.is_active %}
 <div>
     <a href="{{ url_for('logout') }}"><h3>Log Out</h3></a>

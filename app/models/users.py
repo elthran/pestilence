@@ -22,6 +22,9 @@ class User(ModelState):
     # Sessions
     current_session_id = db.Column(db.Integer)
 
+    # Lifetime values
+    games_played = db.Column(db.Integer)
+
     def __init__(self, username):
         self.username = username
         self.password_hash = 'guest'
@@ -31,6 +34,9 @@ class User(ModelState):
         self.is_active = False
         self.is_anonymous = False
 
+        # Lifetime values
+        self.games_played = 0
+
     @property
     def password(self):
         raise AttributeError('Password is not a readable attribute. Only password_hash is stored.')
@@ -39,6 +45,20 @@ class User(ModelState):
     def world(self):
         world = World.query.filter(User.id == self.id).filter(World.active == True).first()
         return world
+
+    @property
+    def session(self):
+        if self.current_session_id:
+            session = Session.query.get(self.current_session_id)
+        else:
+            self.start_session()
+            session = self.session
+        return session
+
+    @property
+    def time_played_in_seconds(self):
+        sessions = Session.query.filter(Session.user_id == self.id).all()
+        return sum(session.length_in_seconds for session in sessions)
 
     def get_id(self):
         """Used by Flask to get the User ID to be used in a session. Must be unique.
@@ -60,7 +80,7 @@ class User(ModelState):
 
     def end_session(self):
         session = Session.query.get(self.current_session_id)
-        session.end_session()
+        session.session_heartbeat()
         self.current_session_id = None
 
     def __repr__(self):

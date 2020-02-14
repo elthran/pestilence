@@ -26,6 +26,7 @@ class World(ModelState):
             your_score = Highscore(self.user_id, self.id, self.diseases[0].dead)
             your_score.save()
             self.active = False
+            self.user.games_played += 1
             return False
 
         infected_cities = [city for city in self.cities if city.infected > 0]
